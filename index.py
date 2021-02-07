@@ -8,7 +8,7 @@ end = 30
 
 resultsList = []
 
-columns = ["Job Title", "Location"]
+columns = ["Job Title", "Description", "Location", "Company", "Salary", "Rating", "Job Link"]
 
 customFrame = pd.DataFrame(columns=columns)
 
@@ -31,15 +31,43 @@ def obtainJobTitle(count):
         num = 1
         for a in div.find_all(name="a", attrs={"data-tn-element": "jobTitle"}):
             jobsListed.append(a["title"])
+        jobSummary = div.find_all(name="div", attrs={"class": "summary"})
+        jobDescription = ''
+        if jobSummary:
+            for li in jobSummary:
+                jobDescription = jobDescription + " " + str(li.text.strip().replace("\n", ""))
+        
+        jobsListed.append(jobDescription)
+        jobDescription = ''
+
         location = div.find_all(name="div", attrs={"class": "location"})
         if len(location) > 0:
             for jobLocation in location:
-                jobsListed.append(jobLocation.text)
+                jobsListed.append(jobLocation.text.strip())
         else:
             jobsListed.append("No Location Provided")
-        #print(jobsListed)
-        #customFrame[num] = jobsListed
+        company = div.find_all(name="span", attrs={"class": "company"})
+        if company:
+            for companyTitle in company:
+                jobsListed.append(companyTitle.text.strip())
+        salary = div.find_all(name="span", attrs={"class": "salaryText"})
+        if salary:
+            for jobSalary in salary:
+                jobsListed.append(jobSalary.text.strip())
+        else:
+            jobsListed.append("Salary Not Provided")
+        rating = div.find_all(name="span", attrs={"class": "ratingsContent"})
+        if rating:
+            for jobRating in rating:
+                jobsListed.append(jobRating.text.strip())
+        else:
+            jobsListed.append("Rating not provided")
+        
+        jobId = div.attrs["data-jk"]
+        jobsListed.append("https://ie.indeed.com/viewjob?jk=" + str(jobId))
+       
         resultsList.append(jobsListed)
+        
         jobsListed = []
         num = num + 1
         
